@@ -1,48 +1,16 @@
-import { ScrollView, Text, View, TouchableOpacity } from "react-native";
-
+import { useEffect } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { AppButton, Card, LoadingBlock, StatusPill } from "@/components/erpclaw-ui";
 import { ScreenContainer } from "@/components/screen-container";
+import { useERPClaw } from "@/contexts/erpclaw-context";
 
-/**
- * Home Screen - NativeWind Example
- *
- * This template uses NativeWind (Tailwind CSS for React Native).
- * You can use familiar Tailwind classes directly in className props.
- *
- * Key patterns:
- * - Use `className` instead of `style` for most styling
- * - Theme colors: use tokens directly (bg-background, text-foreground, bg-primary, etc.); no dark: prefix needed
- * - Responsive: standard Tailwind breakpoints work on web
- * - Custom colors defined in tailwind.config.js
- */
 export default function HomeScreen() {
-  return (
-    <ScreenContainer className="p-6">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 gap-8">
-          {/* Hero Section */}
-          <View className="items-center gap-2">
-            <Text className="text-4xl font-bold text-foreground">Welcome</Text>
-            <Text className="text-base text-muted text-center">
-              Edit app/(tabs)/index.tsx to get started
-            </Text>
-          </View>
-
-          {/* Example Card */}
-          <View className="w-full max-w-sm self-center bg-surface rounded-2xl p-6 shadow-sm border border-border">
-            <Text className="text-lg font-semibold text-foreground mb-2">NativeWind Ready</Text>
-            <Text className="text-sm text-muted leading-relaxed">
-              Use Tailwind CSS classes directly in your React Native components.
-            </Text>
-          </View>
-
-          {/* Example Button */}
-          <View className="items-center">
-            <TouchableOpacity className="bg-primary px-6 py-3 rounded-full active:opacity-80">
-              <Text className="text-background font-semibold">Get Started</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-    </ScreenContainer>
-  );
+  const router = useRouter(); const { catalog, companies, config, error, health, loading } = useERPClaw();
+  useEffect(() => { if (!loading && !config) router.replace("/connect" as never); }, [config, loading, router]);
+  if (loading) return <ScreenContainer><LoadingBlock label="Checking your ERPClaw connection…" /></ScreenContainer>;
+  if (!config) return null;
+  return <ScreenContainer className="px-5"><ScrollView contentContainerStyle={styles.content}><View style={styles.header}><View><Text style={styles.eyebrow}>ERPCLAW MOBILE</Text><Text style={styles.title}>Your business, connected.</Text></View><StatusPill label={health?.status === "ok" ? "LIVE" : "CHECK CONNECTION"} tone={health?.status === "ok" ? "success" : "warning"} /></View>{error ? <Card><Text style={styles.errorTitle}>Connection needs attention</Text><Text style={styles.errorText}>{error}</Text><AppButton title="Reconnect" onPress={() => router.push("/connect" as never)} tone="secondary" /></Card> : null}{companies.length === 0 ? <Card><StatusPill label="EMPTY BUSINESS" tone="neutral" /><Text style={styles.cardTitle}>Start with your real company</Text><Text style={styles.body}>The connected ERPClaw engine has no companies. Create one deliberately; no sample company, ledger entries, or inventory have been added.</Text><AppButton icon="add-business" onPress={() => router.push("/onboarding" as never)} title="Set up my company" /></Card> : <Card><StatusPill label={`${companies.length} COMPANY${companies.length === 1 ? "" : "IES"}`} tone="success" /><Text style={styles.cardTitle}>{companies[0]?.name}</Text><Text style={styles.body}>Select a workspace for sales, purchasing, inventory, people, finance, billing, or advanced accounting.</Text></Card>}<View style={styles.section}><Text style={styles.sectionTitle}>Quick actions</Text><View style={styles.grid}><QuickAction title="New customer" action="add-customer" onPress={(action) => router.push(`/action/${action}` as never)} /><QuickAction title="Create invoice" action="create-sales-invoice" onPress={(action) => router.push(`/action/${action}` as never)} /><QuickAction title="Record payment" action="add-payment" onPress={(action) => router.push(`/action/${action}` as never)} /><QuickAction title="Add inventory item" action="add-item" onPress={(action) => router.push(`/action/${action}` as never)} /></View></View><Card><Text style={styles.cardTitle}>Complete engine coverage</Text><Text style={styles.body}>{catalog ? `${catalog.total} actions are available from the connected ERPClaw catalog. ` : "Catalog discovery is pending. "}The Action Center renders secure JSON inputs for every supported action, including installed modules.</Text><AppButton icon="bolt" onPress={() => router.push("/(tabs)/actions" as never)} title="Open Action Center" tone="secondary" /></Card></ScrollView></ScreenContainer>;
 }
+function QuickAction({ title, action, onPress }: { title: string; action: string; onPress: (action: string) => void }) { return <Card style={styles.quick}><Text style={styles.quickTitle}>{title}</Text><AppButton title="Open" onPress={() => onPress(action)} tone="secondary" /></Card>; }
+const styles = StyleSheet.create({ content: { gap: 18, paddingVertical: 22 }, header: { alignItems: "flex-start", flexDirection: "row", justifyContent: "space-between", gap: 12 }, eyebrow: { color: "#0D5C5A", fontSize: 12, fontWeight: "800", letterSpacing: 1.2 }, title: { color: "#17201E", fontSize: 27, fontWeight: "800", lineHeight: 34 }, section: { gap: 10 }, sectionTitle: { color: "#17201E", fontSize: 19, fontWeight: "800" }, grid: { gap: 10 }, quick: { gap: 10 }, quickTitle: { color: "#17201E", fontSize: 16, fontWeight: "800" }, cardTitle: { color: "#17201E", fontSize: 19, fontWeight: "800" }, body: { color: "#64716C", fontSize: 14, lineHeight: 20 }, errorTitle: { color: "#B62D3A", fontSize: 16, fontWeight: "800" }, errorText: { color: "#7C3B42", fontSize: 14, lineHeight: 20 } });
