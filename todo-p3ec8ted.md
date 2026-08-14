@@ -18,3 +18,6 @@
 - [x] Confirm whether the submitted remote Android build stuck at 0% has any remaining project-side cause (no project-side cause found)
 - [x] Complete final native readiness diagnostics for the queued remote build
 - [x] Document the remote-build stall diagnosis and recovery path (the submitted job is queued at remote-build initialization; project-side native configuration and assets are valid)
+- [x] Diagnose the Expo Go message that the project packager is not running (the mobile client had a stale or unreachable packager route)
+- [x] Restart and verify the Expo development packager endpoint (Metro is listening on port 8081 after restart)
+- [x] Determine whether Expo-account reconnection is needed and document the mobile preview recovery steps (no Expo-account token is involved in this connection error)
