@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   build-apk:
-    name: Build installable debug APK
+    name: Build standalone installable APK
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -40,16 +40,16 @@ jobs:
       - name: Generate Android native project
         run: npx expo prebuild --platform android --no-install
 
-      - name: Build debug APK
+      - name: Build standalone release APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: erpclaw-mobile-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: erpclaw-mobile-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
