@@ -40,4 +40,4 @@ export async function getCatalog(config: GatewayConfig): Promise<GatewayCatalog>
   const actions = Array.isArray(payload.actions) ? payload.actions : payload.core_actions ?? [];
   return { ...payload, actions, total: payload.total ?? actions.length };
 }
-export const executeGatewayAction = (config: GatewayConfig, action: string, args: Record<string, unknown>, confirmed: boolean) => request<ActionResult>(config, `/v1/actions/${encodeURIComponent(action)}`, { method: "POST", body: JSON.stringify({ args, confirmed }) });
+export const executeGatewayAction = (config: GatewayConfig, action: string, args: Record<string, unknown>, confirmed: boolean, idempotencyKey?: string) => request<ActionResult>(config, `/v1/actions/${encodeURIComponent(action)}`, { method: "POST", headers: idempotencyKey ? { "X-Idempotency-Key": idempotencyKey } : undefined, body: JSON.stringify({ args, confirmed }) });

@@ -10,6 +10,7 @@ import json
 import os
 import subprocess
 import sys
+import threading
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -23,6 +24,8 @@ ALLOWED_ORIGINS = {origin.strip() for origin in os.environ.get("ERPCLAW_ALLOWED_
 SOURCE_ROOT = Path(os.environ.get("ERPCLAW_SOURCE", Path(__file__).resolve().parents[2])).resolve()
 ROUTER = SOURCE_ROOT / "scripts" / "db_query.py"
 DEMO_ACTIONS = {"seed-demo-data"}
+IDEMPOTENCY_FILE = Path(os.environ.get("ERPCLAW_IDEMPOTENCY_FILE", Path(os.environ.get("ERPCLAW_HOME", ".")) / "mobile-idempotency.json"))
+IDEMPOTENCY_LOCK = threading.Lock()
 
 class GatewayFailure(Exception):
     def __init__(self, message: str, status: HTTPStatus = HTTPStatus.BAD_REQUEST, details: Any = None): super().__init__(message); self.status, self.details = status, details
@@ -49,6 +52,18 @@ def engine_actions() -> list[str]:
     for module_actions in catalog.get("module_actions", {}).values(): actions.extend(module_actions)
     return sorted({action for action in actions if action not in DEMO_ACTIONS})
 
+def load_idempotency() -> dict[str, dict[str, Any]]:
+    try:
+        return json.loads(IDEMPOTENCY_FILE.read_text(encoding="utf-8")) if IDEMPOTENCY_FILE.is_file() else {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+def save_idempotency(records: dict[str, dict[str, Any]]) -> None:
+    IDEMPOTENCY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    temporary = IDEMPOTENCY_FILE.with_suffix(".tmp")
+    temporary.write_text(json.dumps(records, separators=(",", ":")), encoding="utf-8")
+    temporary.replace(IDEMPOTENCY_FILE)
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "ERPClawGateway/1.0"
     def log_message(self, fmt: str, *args: Any) -> None: sys.stderr.write("ERPClaw gateway: " + fmt % args + "\n")
@@ -70,7 +85,7 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(payload, dict): raise GatewayFailure("Request body must be a JSON object.")
         return payload
     def do_OPTIONS(self) -> None:
-        self.send_response(HTTPStatus.NO_CONTENT); self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type, X-ERPClaw-Client"); self.end_headers()
+        self.send_response(HTTPStatus.NO_CONTENT); self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type, X-ERPClaw-Client, X-Idempotency-Key"); self.end_headers()
     def do_GET(self) -> None:
         if not self.authorized(): self.respond(HTTPStatus.UNAUTHORIZED, {"message": "Unauthorized."}); return
         path = urlparse(self.path).path
@@ -91,7 +106,17 @@ class Handler(BaseHTTPRequestHandler):
             if action not in set(engine_actions()): raise GatewayFailure("This action is not exposed by the connected ERPClaw engine.", HTTPStatus.NOT_FOUND)
             payload = self.read_json(); args = payload.get("args", {})
             if not isinstance(args, dict): raise GatewayFailure("The args field must be a JSON object.")
-            self.respond(HTTPStatus.OK, run_router(action, args, bool(payload.get("confirmed"))))
+            key = self.headers.get("X-Idempotency-Key", "").strip()
+            if key and (len(key) > 200 or not key.replace("_", "").replace("-", "").isalnum()): raise GatewayFailure("Invalid idempotency key.")
+            with IDEMPOTENCY_LOCK:
+                records = load_idempotency()
+                if key and key in records:
+                    self.respond(HTTPStatus.OK, records[key]["result"]); return
+                result = run_router(action, args, bool(payload.get("confirmed")))
+                if key:
+                    records[key] = {"action": action, "result": result}
+                    save_idempotency(records)
+            self.respond(HTTPStatus.OK, result)
         except GatewayFailure as failure: self.respond(failure.status, {"message": str(failure), "details": failure.details})
         except subprocess.TimeoutExpired: self.respond(HTTPStatus.GATEWAY_TIMEOUT, {"message": "ERPClaw did not respond within the gateway timeout."})
 
