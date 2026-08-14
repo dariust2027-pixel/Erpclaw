@@ -1,0 +1,13 @@
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useRouter } from "expo-router";
+import { AppButton, Card, StatusPill } from "@/components/erpclaw-ui";
+import { ScreenContainer } from "@/components/screen-container";
+import { useLocalERP } from "@/contexts/local-erp-context";
+
+export default function StandaloneOnboarding() {
+  const router = useRouter(); const { createCompany } = useLocalERP(); const [name, setName] = useState(""); const [currency, setCurrency] = useState("USD"); const [country, setCountry] = useState("US");
+  return <ScreenContainer edges={["top", "bottom", "left", "right"]} className="px-5"><ScrollView contentContainerStyle={styles.content}><StatusPill label="OFFLINE • DEVICE ONLY" tone="success" /><Text style={styles.title}>Create your local business</Text><Text style={styles.copy}>Your information stays on this phone. No gateway, account, Wi-Fi, or server is needed for this standalone version.</Text><Card><Label label="Business name" value={name} onChange={setName} placeholder="Example: Acme Supply" /><Label label="Currency" value={currency} onChange={setCurrency} placeholder="USD" maxLength={3} /><Label label="Country" value={country} onChange={setCountry} placeholder="US" maxLength={2} /></Card><AppButton disabled={!name.trim()} icon="business" title="Create local company" onPress={() => { createCompany({ name: name.trim(), currency: currency.trim().toUpperCase(), country: country.trim().toUpperCase() }); router.replace("/(tabs)" as never); }} /><Text style={styles.note}>Back up your phone before relying on this data. This local ledger cannot automatically appear on another device.</Text></ScrollView></ScreenContainer>;
+}
+function Label({ label, value, onChange, placeholder, maxLength }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; maxLength?: number }) { return <View style={styles.field}><Text style={styles.label}>{label}</Text><TextInput value={value} onChangeText={onChange} placeholder={placeholder} placeholderTextColor="#8A9690" maxLength={maxLength} autoCapitalize="characters" style={styles.input} /></View>; }
+const styles = StyleSheet.create({ content: { gap: 16, paddingVertical: 28 }, title: { color: "#17201E", fontSize: 29, fontWeight: "800" }, copy: { color: "#64716C", fontSize: 16, lineHeight: 23 }, field: { gap: 7 }, label: { color: "#17201E", fontSize: 14, fontWeight: "800" }, input: { backgroundColor: "#F6F8F7", borderColor: "#D9E2DE", borderRadius: 12, borderWidth: 1, color: "#17201E", minHeight: 48, paddingHorizontal: 14 }, note: { color: "#64716C", fontSize: 13, lineHeight: 19, textAlign: "center" } });
