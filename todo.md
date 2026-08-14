@@ -14,5 +14,5 @@
 - [x] Validate the Android export bundle and native icon configuration after all quality gates pass.
 - [ ] Generate the installable Android APK through the managed Publish workflow after checkpoint creation.
 - [ ] Deliver the APK, architecture plan, audit report, and self-hosting setup instructions.
-- [ ] Push the completed ERPClaw Mobile release candidate to the configured Git remote.
-- [ ] Create the approved private GitHub repository `erpclaw-mobile` and push the release candidate.
+- [x] Push the completed ERPClaw Mobile release candidate to the configured Git remote.
+- [x] Create the approved private GitHub repository `erpclaw-mobile` and push the release candidate.
