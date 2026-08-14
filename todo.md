@@ -17,4 +17,4 @@
 - [x] Push the completed ERPClaw Mobile release candidate to the configured Git remote.
 - [x] Create the approved private GitHub repository `erpclaw-mobile` and push the release candidate.
 - [x] Add, run, and verify a GitHub Actions workflow that builds an installable Android APK artifact.
-- [ ] Fix the Android APK startup hang so a clean install reaches the ERPClaw connection screen.
+- [x] Fix the Android APK startup hang so a clean install reaches the ERPClaw connection screen.
