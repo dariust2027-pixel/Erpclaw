@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, StyleSheet, Text, TextInput } from "react-native";
 import { AppButton, Card } from "@/components/erpclaw-ui";
 import { ScreenContainer } from "@/components/screen-container";
 import { useLocalERP } from "@/contexts/local-erp-context";
