@@ -21,3 +21,6 @@
 - [x] Diagnose the Expo Go message that the project packager is not running (the mobile client had a stale or unreachable packager route)
 - [x] Restart and verify the Expo development packager endpoint (Metro is listening on port 8081 after restart)
 - [x] Determine whether Expo-account reconnection is needed and document the mobile preview recovery steps (no Expo-account token is involved in this connection error)
+- [x] Collect final evidence for the repeated Expo Go packager and remote APK build failures (the HTTP packager route used by Expo Go returns an empty response while the HTTPS preview route returns HTTP 200)
+- [x] Confirm whether the failures are external to the project configuration (confirmed: project-side configuration, native checks, and the HTTPS preview are valid)
+- [x] Provide support escalation details and the verified GitHub APK fallback
