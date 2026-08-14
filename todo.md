@@ -19,3 +19,4 @@
 - [x] Add, run, and verify a GitHub Actions workflow that builds an installable Android APK artifact.
 - [x] Fix the Android APK startup hang so a clean install reaches the ERPClaw connection screen.
 - [x] Add a beginner-friendly guide for running the gateway and connecting ERPClaw Mobile.
+- [x] Verify the published gateway, guide, and upstream-engine comparison, then provide an A-to-Z deployment explanation.
