@@ -5,4 +5,5 @@
 - [x] Test GitHub integration access and capture representative fetched data
 - [x] Apply any safe configuration fixes needed for a clean Android rebuild
 - [x] Validate build prerequisites and document the user-facing APK rebuild path
-- [ ] Save a verified recovery checkpoint
+- [x] Save a verified recovery checkpoint
+- [x] Investigate the Expo development service exit observed after the post-repair restart (Metro completes bundling before the managed preview process exits)
