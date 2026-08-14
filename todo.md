@@ -10,10 +10,10 @@
 - [x] Add a companion self-hosted gateway reference implementation for the upstream Python ERPClaw engine.
 - [x] Add unit, contract, clean-install, and audit tests; fix all release-blocking findings.
 - [x] Generate the required ERPClaw Android application icon and update the mobile branding configuration.
-- [ ] Build and validate an Android APK after all quality gates pass.
+- [x] Build and validate an Android APK after all quality gates pass.
 - [x] Validate the Android export bundle and native icon configuration after all quality gates pass.
 - [ ] Generate the installable Android APK through the managed Publish workflow after checkpoint creation.
 - [ ] Deliver the APK, architecture plan, audit report, and self-hosting setup instructions.
 - [x] Push the completed ERPClaw Mobile release candidate to the configured Git remote.
 - [x] Create the approved private GitHub repository `erpclaw-mobile` and push the release candidate.
-- [ ] Add, run, and verify a GitHub Actions workflow that builds an installable Android APK artifact.
+- [x] Add, run, and verify a GitHub Actions workflow that builds an installable Android APK artifact.
